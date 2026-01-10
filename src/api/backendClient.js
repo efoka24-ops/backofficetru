@@ -179,6 +179,42 @@ export const backendClient = {
     return response.json();
   },
 
+  // Projects CRUD
+  async getProjects() {
+    const response = await fetch(`${BACKEND_URL}/api/projects`);
+    if (!response.ok) throw new Error('Failed to fetch projects');
+    return response.json();
+  },
+
+  async createProject(data) {
+    const response = await fetch(`${BACKEND_URL}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create project');
+    return response.json();
+  },
+
+  async updateProject(id, data) {
+    const response = await fetch(`${BACKEND_URL}/api/projects/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to update project');
+    return response.json();
+  },
+
+  async deleteProject(id) {
+    const response = await fetch(`${BACKEND_URL}/api/projects/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!response.ok) throw new Error('Failed to delete project');
+    return response.json();
+  },
+
   // Health check
   async checkHealth() {
     try {

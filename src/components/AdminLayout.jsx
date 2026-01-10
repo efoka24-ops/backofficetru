@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Users, Briefcase, Lightbulb, FileText, Settings, BarChart3, LogOut, MessageSquare, RefreshCw, ClipboardList, BookOpen } from 'lucide-react';
+import { Menu, X, Users, Briefcase, Lightbulb, FileText, Settings, BarChart3, LogOut, MessageSquare, RefreshCw, ClipboardList, BookOpen, FolderOpen } from 'lucide-react';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
   { path: '/equipe', label: 'Équipe', icon: Users },
   { path: '/services', label: 'Services', icon: Briefcase },
   { path: '/solutions', label: 'Solutions', icon: Lightbulb },
+  { path: '/projects', label: 'Projets réalisés', icon: FolderOpen },
   { path: '/testimonials', label: 'Témoignages', icon: MessageSquare },
   { path: '/contacts', label: 'Contacts', icon: FileText },
   { path: '/news', label: 'Actualités', icon: FileText },

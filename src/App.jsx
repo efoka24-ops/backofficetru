@@ -18,6 +18,7 @@ import ApplicationsPage from './pages/ApplicationsPage'
 import SettingsPage from './pages/SettingsPage'
 import SyncViewPage from './pages/SyncViewPage'
 import LogsPage from './pages/LogsPage'
+import ProjectsManager from './pages/ProjectsManager'
 import './index.css'
 
 console.log('✅ App.jsx: All imports successful');
@@ -81,6 +82,7 @@ function App() {
               <Route path="/member-access" element={<MemberAccessPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/solutions" element={<SolutionsPage />} />
+              <Route path="/projects" element={<ProjectsManager />} />
               <Route path="/contacts" element={<ContactsPage />} />
               <Route path="/testimonials" element={<TestimonialsPage />} />
               <Route path="/news" element={<NewsPage />} />
