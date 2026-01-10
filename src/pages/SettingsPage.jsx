@@ -45,11 +45,9 @@ export default function SettingsPage() {
     queryKey: ['settings'],
     queryFn: async () => {
       try {
-        const response = await backendClient.getSettings();
-        console.log('📥 Settings chargées du backend:', response);
-        return response;
+        return await backendClient.getSettings();
       } catch (error) {
-        console.error('❌ Erreur chargement settings:', error);
+        console.error('Erreur chargement settings:', error);
         return null;
       }
     },
@@ -58,7 +56,6 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (fetchedSettings) {
-      console.log('🔄 Mise à jour des settings:', fetchedSettings);
       setSettings(prevSettings => ({
         ...prevSettings,
         ...fetchedSettings
@@ -103,19 +100,10 @@ export default function SettingsPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('📤 Validation avant sauvegarde:', { siteTitle: settings?.siteTitle, email: settings?.email });
-    
-    if (!settings?.siteTitle?.trim()) {
-      showNotification('❌ Titre du site est obligatoire', 'error');
+    if (!settings?.siteTitle || !settings?.email) {
+      showNotification('Titre et Email sont obligatoires', 'error');
       return;
     }
-    
-    if (!settings?.email?.trim()) {
-      showNotification('❌ Email est obligatoire', 'error');
-      return;
-    }
-    
-    console.log('✅ Validation réussie, sauvegarde en cours...');
     saveMutation.mutate(settings);
   };
 
