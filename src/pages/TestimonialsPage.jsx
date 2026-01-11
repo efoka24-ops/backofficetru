@@ -1,68 +1,49 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '@/api/simpleClient';
 import { uploadImage } from '@/api/uploadHelper';
-import { backendClient } from '@/api/backendClient';
+import { useData } from '@/hooks/useData';
 
 export default function TestimonialsPage() {
+  const {
+    testimonials,
+    addTestimonial,
+    updateTestimonial,
+    deleteTestimonial
+  } = useData();
+
   const [isOpen, setIsOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState(null);
   const [search, setSearch] = useState('');
-  const queryClient = useQueryClient();
+  const [notification, setNotification] = useState(null);
 
-  // Fetch testimonials
-  const { data: testimonials = [], isLoading } = useQuery({
-    queryKey: ['testimonials'],
-    queryFn: async () => {
-      try {
-        return await backendClient.getTestimonials();      } catch (error) {
-        console.error('❌ Erreur:', error);
-        return [];
-      }
-    },
-    staleTime: 30000,
-  });
-
-  // Create/Update mutation
-  const mutation = useMutation({
-    mutationFn: async (data) => {
-      if (editingTestimonial?.id) {
-        return await backendClient.updateTestimonial(editingTestimonial.id, data);
-      } else {
-        return await backendClient.createTestimonial(data);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['testimonials'] });
-      apiClient.notifyFrontend('update', 'testimonials', null);
-      setIsOpen(false);
-      setEditingTestimonial(null);
-    },
-    onError: (error) => {
-      console.error('❌ Erreur:', error);
-      alert('Erreur: ' + (error.message || 'Erreur inconnue'));
-    },
-  });
-
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      return await backendClient.deleteTestimonial(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['testimonials'] });
-      apiClient.notifyFrontend('delete', 'testimonials', null);
-    },
-  });
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!editingTestimonial?.name || !editingTestimonial?.testimonial) {
-      alert('Nom et Témoignage sont obligatoires');
+      showNotification('Nom et Témoignage sont obligatoires', 'error');
       return;
     }
-    mutation.mutate(editingTestimonial);
+    
+    if (editingTestimonial.id) {
+      updateTestimonial(editingTestimonial.id, editingTestimonial);
+      showNotification('✅ Témoignage modifié avec succès!');
+    } else {
+      addTestimonial(editingTestimonial);
+      showNotification('✅ Témoignage créé avec succès!');
+    }
+    
+    setIsOpen(false);
+    setEditingTestimonial(null);
+  };
+
+  const handleDelete = (testimonialId) => {
+    deleteTestimonial(testimonialId);
+    showNotification('✅ Témoignage supprimé avec succès!');
   };
 
   const openCreate = () => {

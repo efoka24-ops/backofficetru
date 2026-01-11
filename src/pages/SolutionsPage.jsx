@@ -3,73 +3,57 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '@/api/simpleClient';
 import { uploadImage } from '@/api/uploadHelper';
+import { useData } from '@/hooks/useData';
 
 export default function SolutionsPage() {
+  const {
+    solutions,
+    addSolution,
+    updateSolution,
+    deleteSolution
+  } = useData();
+
   const [isOpen, setIsOpen] = useState(false);
   const [editingSolution, setEditingSolution] = useState(null);
   const [search, setSearch] = useState('');
-  const queryClient = useQueryClient();
+  const [notification, setNotification] = useState(null);
 
-  // Fetch solutions
-  const { data: solutions = [], isLoading } = useQuery({
-    queryKey: ['solutions'],
-    queryFn: () => apiClient.getSolutions(),
-    staleTime: 30000,
-  });
-
-  // Create/Update mutation
-  const mutation = useMutation({
-    mutationFn: async (data) => {
-      if (editingSolution?.id) {
-        return apiClient.updateSolution(editingSolution.id, data);
-      } else {
-        return apiClient.createSolution(data);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['solutions'] });
-      apiClient.notifyFrontend('update', 'solutions', null);
-      setIsOpen(false);
-      setEditingSolution(null);
-    },
-    onError: (error) => {
-      console.error('❌ Erreur:', error);
-      alert('Erreur: ' + (error.message || 'Erreur inconnue'));
-    },
-  });
-
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      return apiClient.deleteSolution(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['solutions'] });
-      apiClient.notifyFrontend('delete', 'solutions', null);
-    },
-  });
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!editingSolution?.name || !editingSolution?.description) {
-      alert('Nom et Description sont obligatoires');
+      showNotification('Nom et Description sont obligatoires', 'error');
       return;
     }
 
-    const dataToSend = { ...editingSolution };
-    delete dataToSend.imageFile;
+    if (editingSolution.id) {
+      updateSolution(editingSolution.id, editingSolution);
+      showNotification('✅ Solution modifiée avec succès!');
+    } else {
+      addSolution(editingSolution);
+      showNotification('✅ Solution créée avec succès!');
+    }
+    
+    setIsOpen(false);
+    setEditingSolution(null);
+  };
 
-    console.log('📤 Envoi données:', dataToSend);
-    mutation.mutate(dataToSend);
+  const handleDelete = (solutionId) => {
+    deleteSolution(solutionId);
+    showNotification('✅ Solution supprimée avec succès!');
   };
 
   const openCreate = () => {
     setEditingSolution({
       name: '',
       description: '',
-      category: '',
-      image: '',
-      benefits: [],
+      longDescription: '',
+      color: 'from-emerald-500 to-teal-600',
+      icon: '🚀',
       features: [],
     });
     setIsOpen(true);

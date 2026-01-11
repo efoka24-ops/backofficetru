@@ -1,62 +1,20 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/api/simpleClient';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, X, Check, AlertCircle, Loader } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Check, AlertCircle } from 'lucide-react';
+import { useData } from '@/hooks/useData';
 
 export default function ServicesPage() {
+  const {
+    services,
+    addService,
+    updateService,
+    deleteService
+  } = useData();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [notification, setNotification] = useState(null);
-  const queryClient = useQueryClient();
-
-  const { data: services = [], isLoading, refetch } = useQuery({
-    queryKey: ['services'],
-    queryFn: () => apiClient.getServices(),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (data) => apiClient.createService(data),
-    onSuccess: (newService) => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      setIsDialogOpen(false);
-      setEditingService(null);
-      showNotification('✅ Service créé avec succès!');
-      apiClient.notifyFrontend('create', 'service', newService);
-    },
-    onError: (error) => {
-      showNotification('❌ Erreur: ' + error.message, 'error');
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => apiClient.updateService(id, data),
-    onSuccess: (updatedService) => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      setIsDialogOpen(false);
-      setEditingService(null);
-      showNotification('✅ Service modifié avec succès!');
-      apiClient.notifyFrontend('update', 'service', updatedService);
-    },
-    onError: (error) => {
-      showNotification('❌ Erreur: ' + error.message, 'error');
-    }
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => apiClient.deleteService(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      setDeleteConfirm(null);
-      showNotification('✅ Service supprimé avec succès!');
-      apiClient.notifyFrontend('delete', 'service', { id: deleteConfirm });
-    },
-    onError: (error) => {
-      showNotification('❌ Erreur: ' + error.message, 'error');
-    }
-  });
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
@@ -64,24 +22,37 @@ export default function ServicesPage() {
   };
 
   const handleSave = () => {
-    if (!editingService.name?.trim()) {
+    if (!editingService.title?.trim()) {
       showNotification('Le nom est obligatoire', 'error');
       return;
     }
 
     if (editingService.id) {
-      updateMutation.mutate({ id: editingService.id, data: editingService });
+      updateService(editingService.id, editingService);
+      showNotification('✅ Service modifié avec succès!');
     } else {
-      createMutation.mutate(editingService);
+      addService(editingService);
+      showNotification('✅ Service créé avec succès!');
     }
+    
+    setIsDialogOpen(false);
+    setEditingService(null);
+  };
+
+  const handleDelete = (serviceId) => {
+    deleteService(serviceId);
+    setDeleteConfirm(null);
+    showNotification('✅ Service supprimé avec succès!');
   };
 
   const openDialog = (service = null) => {
     setEditingService(service || {
-      name: '',
+      icon: 'Building2',
+      title: '',
       description: '',
-      price: '',
-      category: ''
+      features: [],
+      objective: '',
+      color: 'from-blue-500 to-indigo-600'
     });
     setIsDialogOpen(true);
   };
@@ -133,11 +104,7 @@ export default function ServicesPage() {
           )}
         </AnimatePresence>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader className="w-8 h-8 text-blue-600 animate-spin" />
-          </div>
-        ) : services.length === 0 ? (
+        {services.length === 0 ? (
           <div className="bg-white rounded-xl shadow p-12 text-center">
             <p className="text-slate-600 text-lg">Aucun service pour le moment</p>
           </div>
@@ -153,20 +120,24 @@ export default function ServicesPage() {
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-slate-900">{service.name}</h3>
-                    {service.category && (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">
-                        {service.category}
-                      </span>
-                    )}
+                    <h3 className="text-xl font-bold text-slate-900">{service.title}</h3>
                   </div>
 
                   {service.description && (
                     <p className="text-slate-600 text-sm mb-4 line-clamp-3">{service.description}</p>
                   )}
 
-                  {service.price && (
-                    <p className="text-2xl font-bold text-blue-600 mb-4">${service.price}</p>
+                  {service.features && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-slate-700 mb-2">Caractéristiques:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {service.features.slice(0, 3).map((feature, i) => (
+                          <span key={i} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
 
                   <div className="flex gap-2 pt-4 border-t border-slate-200">
@@ -225,8 +196,8 @@ export default function ServicesPage() {
                     <label className="block text-sm font-semibold mb-1">Nom *</label>
                     <input
                       type="text"
-                      value={editingService.name || ''}
-                      onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
+                      value={editingService.title || ''}
+                      onChange={(e) => setEditingService({ ...editingService, title: e.target.value })}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"
                       placeholder="Nom du service"
                     />
@@ -243,23 +214,15 @@ export default function ServicesPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold mb-1">Prix</label>
-                      <input
-                        type="number"
-                        value={editingService.price || ''}
-                        onChange={(e) => setEditingService({ ...editingService, price: e.target.value })}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold mb-1">Catégorie</label>
+                      <label className="block text-sm font-semibold mb-1">Objectif</label>
                       <input
                         type="text"
-                        value={editingService.category || ''}
-                        onChange={(e) => setEditingService({ ...editingService, category: e.target.value })}
+                        value={editingService.objective || ''}
+                        onChange={(e) => setEditingService({ ...editingService, objective: e.target.value })}
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        placeholder="Objectif du service"
                       />
                     </div>
                   </div>
@@ -274,10 +237,10 @@ export default function ServicesPage() {
                   </button>
                   <button
                     onClick={handleSave}
-                    disabled={createMutation.isPending || updateMutation.isPending}
+                    disabled={!editingService.title?.trim()}
                     className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-semibold disabled:opacity-50"
                   >
-                    {createMutation.isPending || updateMutation.isPending ? 'Sauvegarde...' : 'Sauvegarder'}
+                    Sauvegarder
                   </button>
                 </div>
               </motion.div>
@@ -312,11 +275,10 @@ export default function ServicesPage() {
                     Annuler
                   </button>
                   <button
-                    onClick={() => deleteMutation.mutate(deleteConfirm)}
-                    disabled={deleteMutation.isPending}
+                    onClick={() => handleDelete(deleteConfirm)}
                     className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-semibold disabled:opacity-50"
                   >
-                    {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+                    Supprimer
                   </button>
                 </div>
               </motion.div>
