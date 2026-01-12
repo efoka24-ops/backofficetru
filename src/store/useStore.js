@@ -1,8 +1,17 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 // Import initial data
 import initialData from '../../../backend/data.example.json';
+
+/**
+ * Zustand Store with Persistent Storage
+ * 
+ * PERSISTANCE STRATEGY:
+ * 1. Primary: localStorage (tru-backoffice-store)
+ * 2. Fallback: Zustand state memory (if localStorage fails)
+ * 3. Initialize: Load from backend/data.example.json on first run
+ */
 
 const useStore = create(
   persist(
@@ -217,8 +226,43 @@ const useStore = create(
       }
     }),
     {
-      name: 'tru-backoffice-store',
-      version: 1
+      name: 'tru-backoffice-store', // localStorage key
+      storage: createJSONStorage(() => localStorage), // Explicit localStorage
+      version: 1, // Schema version for migrations
+      partialize: (state) => ({
+        // Only persist these fields (exclude functions)
+        team: state.team,
+        services: state.services,
+        solutions: state.solutions,
+        testimonials: state.testimonials,
+        contacts: state.contacts,
+        news: state.news,
+        jobs: state.jobs,
+        applications: state.applications,
+        projects: state.projects,
+        settings: state.settings
+      }),
+      // Auto-save on every state change
+      merge: (persistedState, currentState) => {
+        // If no persisted state exists, use initial data
+        if (!persistedState || Object.keys(persistedState).length === 0) {
+          return {
+            ...currentState,
+            team: initialData.team || [],
+            services: initialData.services || [],
+            solutions: initialData.solutions || [],
+            testimonials: initialData.testimonials || [],
+            contacts: initialData.contacts || [],
+            news: initialData.news || [],
+            jobs: initialData.jobs || [],
+            applications: initialData.applications || [],
+            projects: initialData.projects || [],
+            settings: initialData.settings || {}
+          };
+        }
+        // Merge persisted state with current state
+        return { ...currentState, ...persistedState };
+      }
     }
   )
 );

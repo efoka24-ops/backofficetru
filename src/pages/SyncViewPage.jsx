@@ -10,7 +10,7 @@ import {
   Globe,
   ChevronDown
 } from 'lucide-react';
-import { syncService } from '@/services/syncService';
+import syncService from '@/services/syncService';
 import { logger } from '@/services/logger';
 import { teamAPI } from '@/services/api';
 

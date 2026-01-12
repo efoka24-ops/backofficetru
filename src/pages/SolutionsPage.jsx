@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiClient } from '@/api/simpleClient';
 import { uploadImage } from '@/api/uploadHelper';
 import { useData } from '@/hooks/useData';
 
@@ -99,17 +97,8 @@ export default function SolutionsPage() {
           />
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
-            <p className="mt-4 text-slate-600">Chargement...</p>
-          </div>
-        )}
-
         {/* Solutions Grid */}
-        {!isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
               {filtered.map((solution) => (
                 <motion.div
@@ -181,7 +170,7 @@ export default function SolutionsPage() {
                       <button
                         onClick={() => {
                           if (confirm('Confirmer la suppression?')) {
-                            deleteMutation.mutate(solution.id);
+                            handleDelete(solution.id);
                           }
                         }}
                         className="flex-1 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded font-semibold transition-colors text-sm"
@@ -194,9 +183,8 @@ export default function SolutionsPage() {
               ))}
             </AnimatePresence>
           </div>
-        )}
 
-        {!isLoading && filtered.length === 0 && (
+        {filtered.length === 0 && (
           <div className="text-center py-12 bg-white rounded-lg">
             <p className="text-slate-600 text-lg">Aucune solution trouvée</p>
           </div>

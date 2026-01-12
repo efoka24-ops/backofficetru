@@ -19,9 +19,15 @@ import SettingsPage from './pages/SettingsPage'
 import SyncViewPage from './pages/SyncViewPage'
 import LogsPage from './pages/LogsPage'
 import ProjectsManager from './pages/ProjectsManager'
+import { setupDebugConsole } from './utils/debugConsole'
 import './index.css'
 
 console.log('✅ App.jsx: All imports successful');
+
+// Activer le debug console en développement
+if (import.meta.env.DEV) {
+  setupDebugConsole();
+}
 
 const queryClient = new QueryClient()
 

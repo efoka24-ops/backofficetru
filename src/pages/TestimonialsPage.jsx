@@ -16,6 +16,7 @@ export default function TestimonialsPage() {
   const [editingTestimonial, setEditingTestimonial] = useState(null);
   const [search, setSearch] = useState('');
   const [notification, setNotification] = useState(null);
+  const [isLoading] = useState(false); // Not needed for Zustand, but kept for UI consistency
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
