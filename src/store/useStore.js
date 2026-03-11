@@ -1,223 +1,273 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import initialData from '../../../backend/data.example.json';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 /**
- * Global state store with localStorage persistence
- * Backoffice & Frontend share the same state
+ * Zustand Store with Persistent Storage
+ * 
+ * PERSISTANCE STRATEGY:
+ * 1. Primary: localStorage (tru-backoffice-store)
+ * 2. Fallback: Zustand state memory (if localStorage fails)
+ * 3. Initialize: Load from backend API on first run
  */
+
 const useStore = create(
   persist(
     (set, get) => ({
-      // Initial state from data.example.json
-      team: initialData.team || [],
-      services: initialData.services || [],
-      solutions: initialData.solutions || [],
-      testimonials: initialData.testimonials || [],
-      contacts: initialData.contacts || [],
-      news: initialData.news || [],
-      jobs: initialData.jobs || [],
-      applications: initialData.applications || [],
-      projects: initialData.projects || [],
-      settings: initialData.settings || {},
+      // Data state
+      team: [],
+      services: [],
+      solutions: [],
+      testimonials: [],
+      contacts: [],
+      news: [],
+      jobs: [],
+      applications: [],
+      projects: [],
+      settings: {},
+      _hydratedFromBackend: false,
+      _lastUpdate: null,
 
-      // ===== TEAM ACTIONS =====
+      hydrateFromBackend: async (authToken) => {
+        const state = get();
+
+        if (state._hydratedFromBackend) return;
+
+        const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+
+        const hasAnyData =
+          (state.team?.length || 0) > 0 ||
+          (state.services?.length || 0) > 0 ||
+          (state.solutions?.length || 0) > 0 ||
+          (state.testimonials?.length || 0) > 0 ||
+          (state.news?.length || 0) > 0 ||
+          (state.jobs?.length || 0) > 0 ||
+          (state.applications?.length || 0) > 0 ||
+          (state.contacts?.length || 0) > 0 ||
+          (state.projects?.length || 0) > 0;
+
+        // If localStorage already has data, keep it as the source of truth.
+        if (hasAnyData) {
+          set(() => ({ _hydratedFromBackend: true }));
+          return;
+        }
+
+        const headers = authToken ? { Authorization: `Bearer ${authToken}` } : undefined;
+
+        const fetchJson = async (path, opts) => {
+          const res = await fetch(`${apiBaseUrl}${path}`, opts);
+          if (!res.ok) return null;
+          return res.json();
+        };
+
+        try {
+          const [
+            team,
+            services,
+            solutions,
+            testimonials,
+            news,
+            jobs,
+            projects,
+            contacts,
+            applications,
+          ] = await Promise.all([
+            fetchJson('/api/team'),
+            fetchJson('/api/services'),
+            fetchJson('/api/solutions'),
+            fetchJson('/api/testimonials'),
+            fetchJson('/api/news'),
+            fetchJson('/api/jobs'),
+            fetchJson('/api/projects'),
+            headers ? fetchJson('/api/contacts', { headers }) : Promise.resolve(null),
+            headers ? fetchJson('/api/applications', { headers }) : Promise.resolve(null),
+          ]);
+
+          set(() => ({
+            team: Array.isArray(team) ? team : [],
+            services: Array.isArray(services) ? services : [],
+            solutions: Array.isArray(solutions) ? solutions : [],
+            testimonials: Array.isArray(testimonials) ? testimonials : [],
+            news: Array.isArray(news) ? news : [],
+            jobs: Array.isArray(jobs) ? jobs : [],
+            projects: Array.isArray(projects) ? projects : [],
+            contacts: Array.isArray(contacts) ? contacts : [],
+            applications: Array.isArray(applications) ? applications : [],
+            _hydratedFromBackend: true,
+            _lastUpdate: new Date().toISOString(),
+          }));
+        } catch (e) {
+          set(() => ({ _hydratedFromBackend: true }));
+        }
+      },
+
+      // Team CRUD
       addTeamMember: (member) => {
         set((state) => ({
-          team: [...state.team, { ...member, id: Math.max(...state.team.map(m => m.id), 0) + 1 }],
+          team: [...state.team, { ...member, id: member.id || Date.now() }]
         }));
       },
-
-      updateTeamMember: (id, updatedMember) => {
+      updateTeamMember: (id, member) => {
         set((state) => ({
-          team: state.team.map((member) =>
-            member.id === id ? { ...member, ...updatedMember } : member
-          ),
+          team: state.team.map((m) => (m.id === id ? { ...m, ...member } : m))
         }));
       },
-
       deleteTeamMember: (id) => {
         set((state) => ({
-          team: state.team.filter((member) => member.id !== id),
+          team: state.team.filter((m) => m.id !== id)
         }));
       },
 
-      // ===== SERVICES ACTIONS =====
+      // Services CRUD
       addService: (service) => {
         set((state) => ({
-          services: [...state.services, { ...service, id: Math.max(...state.services.map(s => s.id), 0) + 1 }],
+          services: [...state.services, { ...service, id: service.id || Date.now() }]
         }));
       },
-
-      updateService: (id, updatedService) => {
+      updateService: (id, service) => {
         set((state) => ({
-          services: state.services.map((service) =>
-            service.id === id ? { ...service, ...updatedService } : service
-          ),
+          services: state.services.map((s) => (s.id === id ? { ...s, ...service } : s))
         }));
       },
-
       deleteService: (id) => {
         set((state) => ({
-          services: state.services.filter((service) => service.id !== id),
+          services: state.services.filter((s) => s.id !== id)
         }));
       },
 
-      // ===== SOLUTIONS ACTIONS =====
+      // Solutions CRUD
       addSolution: (solution) => {
         set((state) => ({
-          solutions: [...state.solutions, { ...solution, id: Math.max(...state.solutions.map(s => s.id), 0) + 1 }],
+          solutions: [...state.solutions, { ...solution, id: solution.id || Date.now() }]
         }));
       },
-
-      updateSolution: (id, updatedSolution) => {
+      updateSolution: (id, solution) => {
         set((state) => ({
-          solutions: state.solutions.map((solution) =>
-            solution.id === id ? { ...solution, ...updatedSolution } : solution
-          ),
+          solutions: state.solutions.map((s) => (s.id === id ? { ...s, ...solution } : s))
         }));
       },
-
       deleteSolution: (id) => {
         set((state) => ({
-          solutions: state.solutions.filter((solution) => solution.id !== id),
+          solutions: state.solutions.filter((s) => s.id !== id)
         }));
       },
 
-      // ===== TESTIMONIALS ACTIONS =====
+      // Testimonials CRUD
       addTestimonial: (testimonial) => {
         set((state) => ({
-          testimonials: [...state.testimonials, { ...testimonial, id: Math.max(...state.testimonials.map(t => t.id), 0) + 1, createdAt: new Date().toISOString() }],
+          testimonials: [...state.testimonials, { ...testimonial, id: testimonial.id || Date.now() }]
         }));
       },
-
-      updateTestimonial: (id, updatedTestimonial) => {
+      updateTestimonial: (id, testimonial) => {
         set((state) => ({
-          testimonials: state.testimonials.map((testimonial) =>
-            testimonial.id === id ? { ...testimonial, ...updatedTestimonial } : testimonial
-          ),
+          testimonials: state.testimonials.map((t) => (t.id === id ? { ...t, ...testimonial } : t))
         }));
       },
-
       deleteTestimonial: (id) => {
         set((state) => ({
-          testimonials: state.testimonials.filter((testimonial) => testimonial.id !== id),
+          testimonials: state.testimonials.filter((t) => t.id !== id)
         }));
       },
 
-      // ===== CONTACTS ACTIONS =====
+      // Contacts CRUD
       addContact: (contact) => {
         set((state) => ({
-          contacts: [...state.contacts, { ...contact, id: Math.max(...state.contacts.map(c => c.id), 0) + 1, createdAt: new Date().toISOString() }],
+          contacts: [...state.contacts, { ...contact, id: contact.id || Date.now() }]
         }));
       },
-
       deleteContact: (id) => {
         set((state) => ({
-          contacts: state.contacts.filter((contact) => contact.id !== id),
+          contacts: state.contacts.filter((c) => c.id !== id)
         }));
       },
 
-      // ===== NEWS ACTIONS =====
-      addNews: (news) => {
+      // News CRUD
+      addNews: (newsItem) => {
         set((state) => ({
-          news: [...state.news, { ...news, id: Math.max(...state.news.map(n => n.id), 0) + 1, createdAt: new Date().toISOString() }],
+          news: [...state.news, { ...newsItem, id: newsItem.id || Date.now() }]
         }));
       },
-
-      updateNews: (id, updatedNews) => {
+      updateNews: (id, newsItem) => {
         set((state) => ({
-          news: state.news.map((item) =>
-            item.id === id ? { ...item, ...updatedNews } : item
-          ),
+          news: state.news.map((n) => (n.id === id ? { ...n, ...newsItem } : n))
         }));
       },
-
       deleteNews: (id) => {
         set((state) => ({
-          news: state.news.filter((item) => item.id !== id),
+          news: state.news.filter((n) => n.id !== id)
         }));
       },
 
-      // ===== JOBS ACTIONS =====
+      // Jobs CRUD
       addJob: (job) => {
         set((state) => ({
-          jobs: [...state.jobs, { ...job, id: Math.max(...state.jobs.map(j => j.id), 0) + 1, createdAt: new Date().toISOString() }],
+          jobs: [...state.jobs, { ...job, id: job.id || Date.now() }]
         }));
       },
-
-      updateJob: (id, updatedJob) => {
+      updateJob: (id, job) => {
         set((state) => ({
-          jobs: state.jobs.map((job) =>
-            job.id === id ? { ...job, ...updatedJob } : job
-          ),
+          jobs: state.jobs.map((j) => (j.id === id ? { ...j, ...job } : j))
         }));
       },
-
       deleteJob: (id) => {
         set((state) => ({
-          jobs: state.jobs.filter((job) => job.id !== id),
+          jobs: state.jobs.filter((j) => j.id !== id)
         }));
       },
 
-      // ===== APPLICATIONS ACTIONS =====
+      // Applications CRUD
       addApplication: (application) => {
         set((state) => ({
-          applications: [...state.applications, { ...application, id: Math.max(...state.applications.map(a => a.id), 0) + 1, createdAt: new Date().toISOString() }],
+          applications: [...state.applications, { ...application, id: application.id || Date.now() }]
         }));
       },
-
       deleteApplication: (id) => {
         set((state) => ({
-          applications: state.applications.filter((application) => application.id !== id),
+          applications: state.applications.filter((a) => a.id !== id)
         }));
       },
 
-      // ===== PROJECTS ACTIONS =====
+      // Projects CRUD
       addProject: (project) => {
         set((state) => ({
-          projects: [...state.projects, { ...project, id: Math.max(...state.projects.map(p => p.id), 0) + 1, createdAt: new Date().toISOString() }],
+          projects: [...state.projects, { ...project, id: project.id || Date.now() }]
         }));
       },
-
-      updateProject: (id, updatedProject) => {
+      updateProject: (id, project) => {
         set((state) => ({
-          projects: state.projects.map((project) =>
-            project.id === id ? { ...project, ...updatedProject } : project
-          ),
+          projects: state.projects.map((p) => (p.id === id ? { ...p, ...project } : p))
         }));
       },
-
       deleteProject: (id) => {
         set((state) => ({
-          projects: state.projects.filter((project) => project.id !== id),
+          projects: state.projects.filter((p) => p.id !== id)
         }));
       },
 
-      // ===== SETTINGS ACTIONS =====
-      updateSettings: (newSettings) => {
-        set((state) => ({
-          settings: { ...state.settings, ...newSettings },
+      // Settings
+      updateSettings: (settings) => {
+        set(() => ({
+          settings
         }));
       },
 
-      // ===== RESET ACTIONS =====
+      // Utility functions
       resetToDefault: () => {
-        set({
-          team: initialData.team || [],
-          services: initialData.services || [],
-          solutions: initialData.solutions || [],
-          testimonials: initialData.testimonials || [],
-          contacts: initialData.contacts || [],
-          news: initialData.news || [],
-          jobs: initialData.jobs || [],
-          applications: initialData.applications || [],
-          projects: initialData.projects || [],
-          settings: initialData.settings || {},
-        });
+        set(() => ({
+          team: [],
+          services: [],
+          solutions: [],
+          testimonials: [],
+          contacts: [],
+          news: [],
+          jobs: [],
+          applications: [],
+          projects: [],
+          settings: {},
+          _hydratedFromBackend: false,
+          _lastUpdate: null,
+        }));
       },
 
-      // Export/Import for backup
       exportData: () => {
         const state = get();
         return {
@@ -230,12 +280,12 @@ const useStore = create(
           jobs: state.jobs,
           applications: state.applications,
           projects: state.projects,
-          settings: state.settings,
+          settings: state.settings
         };
       },
 
       importData: (data) => {
-        set({
+        set(() => ({
           team: data.team || [],
           services: data.services || [],
           solutions: data.solutions || [],
@@ -245,13 +295,48 @@ const useStore = create(
           jobs: data.jobs || [],
           applications: data.applications || [],
           projects: data.projects || [],
-          settings: data.settings || {},
-        });
-      },
+          settings: data.settings || {}
+        }));
+      }
     }),
     {
-      name: 'tru-app-store', // localStorage key
-      version: 1,
+      name: 'tru-backoffice-store', // localStorage key
+      storage: createJSONStorage(() => localStorage), // Explicit localStorage
+      version: 1, // Schema version for migrations
+      partialize: (state) => ({
+        // Only persist these fields (exclude functions)
+        team: state.team,
+        services: state.services,
+        solutions: state.solutions,
+        testimonials: state.testimonials,
+        contacts: state.contacts,
+        news: state.news,
+        jobs: state.jobs,
+        applications: state.applications,
+        projects: state.projects,
+        settings: state.settings
+      }),
+      // Auto-save on every state change
+      merge: (persistedState, currentState) => {
+        // If no persisted state exists, use initial data
+        if (!persistedState || Object.keys(persistedState).length === 0) {
+          return {
+            ...currentState,
+            team: initialData.team || [],
+            services: initialData.services || [],
+            solutions: initialData.solutions || [],
+            testimonials: initialData.testimonials || [],
+            contacts: initialData.contacts || [],
+            news: initialData.news || [],
+            jobs: initialData.jobs || [],
+            applications: initialData.applications || [],
+            projects: initialData.projects || [],
+            settings: initialData.settings || {}
+          };
+        }
+        // Merge persisted state with current state
+        return { ...currentState, ...persistedState };
+      }
     }
   )
 );

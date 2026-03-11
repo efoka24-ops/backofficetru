@@ -1,76 +1,70 @@
 import useStore from '../store/useStore';
 
 /**
- * Hook that wraps store actions
- * Used by backoffice to interact with data without backend
+ * Hook for accessing Zustand store data in components
+ * Provides simplified access to all CRUD operations and state
  */
 export const useData = () => {
-  const store = useStore();
-
   return {
-    // Read data
-    team: store.team,
-    services: store.services,
-    solutions: store.solutions,
-    testimonials: store.testimonials,
-    contacts: store.contacts,
-    news: store.news,
-    jobs: store.jobs,
-    applications: store.applications,
-    projects: store.projects,
-    settings: store.settings,
+    // Team state & actions
+    team: useStore((state) => state.team),
+    addTeamMember: useStore((state) => state.addTeamMember),
+    updateTeamMember: useStore((state) => state.updateTeamMember),
+    deleteTeamMember: useStore((state) => state.deleteTeamMember),
 
-    // Team CRUD
-    addTeamMember: store.addTeamMember,
-    updateTeamMember: store.updateTeamMember,
-    deleteTeamMember: store.deleteTeamMember,
+    // Services state & actions
+    services: useStore((state) => state.services),
+    addService: useStore((state) => state.addService),
+    updateService: useStore((state) => state.updateService),
+    deleteService: useStore((state) => state.deleteService),
 
-    // Services CRUD
-    addService: store.addService,
-    updateService: store.updateService,
-    deleteService: store.deleteService,
+    // Solutions state & actions
+    solutions: useStore((state) => state.solutions),
+    addSolution: useStore((state) => state.addSolution),
+    updateSolution: useStore((state) => state.updateSolution),
+    deleteSolution: useStore((state) => state.deleteSolution),
 
-    // Solutions CRUD
-    addSolution: store.addSolution,
-    updateSolution: store.updateSolution,
-    deleteSolution: store.deleteSolution,
+    // Testimonials state & actions
+    testimonials: useStore((state) => state.testimonials),
+    addTestimonial: useStore((state) => state.addTestimonial),
+    updateTestimonial: useStore((state) => state.updateTestimonial),
+    deleteTestimonial: useStore((state) => state.deleteTestimonial),
 
-    // Testimonials CRUD
-    addTestimonial: store.addTestimonial,
-    updateTestimonial: store.updateTestimonial,
-    deleteTestimonial: store.deleteTestimonial,
+    // Contacts state & actions
+    contacts: useStore((state) => state.contacts),
+    addContact: useStore((state) => state.addContact),
+    deleteContact: useStore((state) => state.deleteContact),
 
-    // Contacts CRUD
-    addContact: store.addContact,
-    deleteContact: store.deleteContact,
+    // News state & actions
+    news: useStore((state) => state.news),
+    addNews: useStore((state) => state.addNews),
+    updateNews: useStore((state) => state.updateNews),
+    deleteNews: useStore((state) => state.deleteNews),
 
-    // News CRUD
-    addNews: store.addNews,
-    updateNews: store.updateNews,
-    deleteNews: store.deleteNews,
+    // Jobs state & actions
+    jobs: useStore((state) => state.jobs),
+    addJob: useStore((state) => state.addJob),
+    updateJob: useStore((state) => state.updateJob),
+    deleteJob: useStore((state) => state.deleteJob),
 
-    // Jobs CRUD
-    addJob: store.addJob,
-    updateJob: store.updateJob,
-    deleteJob: store.deleteJob,
+    // Applications state & actions
+    applications: useStore((state) => state.applications),
+    addApplication: useStore((state) => state.addApplication),
+    deleteApplication: useStore((state) => state.deleteApplication),
 
-    // Applications CRUD
-    addApplication: store.addApplication,
-    deleteApplication: store.deleteApplication,
+    // Projects state & actions
+    projects: useStore((state) => state.projects),
+    addProject: useStore((state) => state.addProject),
+    updateProject: useStore((state) => state.updateProject),
+    deleteProject: useStore((state) => state.deleteProject),
 
-    // Projects CRUD
-    addProject: store.addProject,
-    updateProject: store.updateProject,
-    deleteProject: store.deleteProject,
+    // Settings state & actions
+    settings: useStore((state) => state.settings),
+    updateSettings: useStore((state) => state.updateSettings),
 
-    // Settings
-    updateSettings: store.updateSettings,
-
-    // Utils
-    resetToDefault: store.resetToDefault,
-    exportData: store.exportData,
-    importData: store.importData,
+    // Utility functions
+    resetToDefault: useStore((state) => state.resetToDefault),
+    exportData: useStore((state) => state.exportData),
+    importData: useStore((state) => state.importData)
   };
 };
-
-export default useData;

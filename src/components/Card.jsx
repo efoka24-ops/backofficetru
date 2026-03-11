@@ -1,9 +1,13 @@
-import React from 'react';
+import React from 'react'
+import './Card.css'
 
-export function Card({ children, className = '' }) {
+export default function Card({ title, children, className = '' }) {
   return (
-    <div className={`bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-500 ${className}`}>
-      {children}
+    <div className={`card ${className}`}>
+      {title && <h2 className="card-title">{title}</h2>}
+      <div className="card-content">
+        {children}
+      </div>
     </div>
-  );
+  )
 }
