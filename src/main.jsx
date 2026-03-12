@@ -1,34 +1,33 @@
-import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter as Router } from 'react-router-dom'
 import App from './App'
-import ErrorBoundary from './components/ErrorBoundary'
+import './index.css'
+import './admin.css'
 
-// Initialize app
-async function initApp() {
-  try {
-    // Initialiser les endpoints API du Frontend
-    const { setupFrontendAPI } = await import('./api/frontendAPI');
-    setupFrontendAPI();
-  } catch (error) {
-    console.warn('Frontend API setup warning:', error.message);
-  }
+// Cache buster - Force rebuild: 2026-01-04_13:45:00
+console.log('✅ main.jsx: All imports successful');
 
-  const root = document.getElementById('root');
-  if (!root) {
-    document.body.innerHTML = '<div style="padding: 20px; font-family: system-ui; color: red;">Erreur: Élément root non trouvé</div>';
-  } else {
-    ReactDOM.createRoot(root).render(
-      <React.StrictMode>
-        <ErrorBoundary>
-          <Router>
-            <App />
-          </Router>
-        </ErrorBoundary>
-      </React.StrictMode>,
-    );
+try {
+  console.log('📦 Mounting React app...');
+  const rootElement = document.getElementById('root');
+  console.log('🎯 Root element found:', rootElement);
+  
+  if (!rootElement) {
+    throw new Error('Root element not found in HTML!');
   }
+  
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+  
+  console.log('✅ React app mounted successfully');
+} catch (error) {
+  console.error('❌ Error mounting app:', error);
+  document.body.innerHTML = `<div style="padding: 20px; color: red; font-family: monospace;">
+    <h1>Erreur d'initialisation</h1>
+    <pre>${error.message}</pre>
+    <pre>${error.stack}</pre>
+  </div>`;
 }
-
-initApp();

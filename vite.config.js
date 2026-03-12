@@ -6,19 +6,15 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-  build: {
-    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
-    minify: 'esbuild',
+      '@': path.resolve(__dirname, './src')
+    }
   },
   server: {
+    port: 3000,
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
-        changeOrigin: true,
-        rewrite: (path) => path
+        changeOrigin: true
       }
     }
   }

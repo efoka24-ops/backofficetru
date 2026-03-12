@@ -9,6 +9,8 @@ export default function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -20,22 +22,26 @@ export default function Login({ onLogin }) {
         throw new Error('Email et mot de passe requis');
       }
 
-      // Données de test (à remplacer par une vraie API)
-      const testCredentials = {
-        email: 'admin@trugroup.cm',
-        password: 'TRU2024!' // À changer en production!
-      };
+      const res = await fetch(`${apiBaseUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (email === testCredentials.email && password === testCredentials.password) {
-        // Créer un token simple
-        const token = btoa(`${email}:${Date.now()}`);
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('userEmail', email);
-        
-        onLogin();
-      } else {
+      if (!res.ok) {
         throw new Error('Email ou mot de passe incorrect');
       }
+
+      const data = await res.json();
+      const token = data?.token;
+      if (!token || typeof token !== 'string') {
+        throw new Error('Réponse serveur invalide');
+      }
+
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('userEmail', email);
+
+      onLogin();
     } catch (err) {
       setError(err.message);
     } finally {
