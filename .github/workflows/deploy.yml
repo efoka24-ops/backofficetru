@@ -36,7 +36,7 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/backofficetru:latest
+            ghcr.io/${{ github.repository_owner }}/backofficetru:${{ github.run_number }}
             ghcr.io/${{ github.repository_owner }}/backofficetru:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -67,11 +67,19 @@ jobs:
             echo "Login to GHCR"
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
+            echo "Set image tag (BACKOFFICETRU_TAG=${{ github.run_number }})"
+            touch .env
+            if grep -q '^BACKOFFICETRU_TAG=' .env; then
+              sed -i 's/^BACKOFFICETRU_TAG=.*/BACKOFFICETRU_TAG=${{ github.run_number }}/' .env
+            else
+              echo 'BACKOFFICETRU_TAG=${{ github.run_number }}' >> .env
+            fi
+
             echo "Pull latest images"
             docker compose pull
 
             echo "Recreate containers"
-            docker compose up -d --force-recreate
+            docker compose up -d --force-recreate --remove-orphans
 
             echo "Remove unused images"
             docker image prune -af
