@@ -8,6 +8,11 @@ const baseURL = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
 const cleanURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
 const BACKEND_URL = `${cleanURL}/api`;
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const apiClient = {
   // ÉQUIPE
   async getTeam() {
@@ -25,7 +30,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${BACKEND_URL}/team`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error('Erreur création membre');
@@ -40,7 +45,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${BACKEND_URL}/team/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error('Erreur modification membre');
@@ -54,7 +59,8 @@ export const apiClient = {
   async deleteTeamMember(id) {
     try {
       const response = await fetch(`${BACKEND_URL}/team/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Erreur suppression membre');
       return await response.json();
@@ -80,7 +86,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${BACKEND_URL}/services`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error('Erreur création service');
@@ -95,7 +101,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${BACKEND_URL}/services/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error('Erreur modification service');
@@ -109,7 +115,8 @@ export const apiClient = {
   async deleteService(id) {
     try {
       const response = await fetch(`${BACKEND_URL}/services/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Erreur suppression service');
       return await response.json();
@@ -135,7 +142,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${BACKEND_URL}/solutions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error('Erreur création solution');
@@ -150,7 +157,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${BACKEND_URL}/solutions/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error('Erreur modification solution');
@@ -164,7 +171,8 @@ export const apiClient = {
   async deleteSolution(id) {
     try {
       const response = await fetch(`${BACKEND_URL}/solutions/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Erreur suppression solution');
       return await response.json();
@@ -190,7 +198,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${BACKEND_URL}/contacts/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error('Erreur modification contact');
@@ -204,7 +212,8 @@ export const apiClient = {
   async deleteContact(id) {
     try {
       const response = await fetch(`${BACKEND_URL}/contacts/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Erreur suppression contact');
       return await response.json();
@@ -220,7 +229,7 @@ export const apiClient = {
     // Le frontend récupère les données du backend via les hooks
     // Cette fonction est gardée pour la compatibilité
     try {
-      const frontendUrl = import.meta.env.VITE_FRONTEND_URL || 'https://fo.trugroup.cm';
+      const frontendUrl = import.meta.env.VITE_FRONTEND_URL || 'https://admin.trugroup.cm';
       // Dans une app réelle, on pourrait utiliser WebSocket ou Server-Sent Events
       // Pour l'instant, on log juste l'action
       console.log('📢 Frontend sync notification:', { action, type, frontendUrl });

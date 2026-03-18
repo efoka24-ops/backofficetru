@@ -51,6 +51,7 @@ export const useStore = create(
           return;
         }
 
+        const authToken = token || localStorage.getItem('authToken');
         const headers = authToken ? { Authorization: `Bearer ${authToken}` } : undefined;
 
         const fetchJson = async (path, opts) => {
