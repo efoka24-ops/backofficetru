@@ -21,7 +21,7 @@ const LOG_COLORS = {
 
 class Logger {
   constructor(backendUrl) {
-    this.backendUrl = backendUrl || import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+    this.backendUrl = backendUrl || import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
     this.logs = [];
     this.maxLocalLogs = 100; // Garder les 100 derniers logs en local
   }

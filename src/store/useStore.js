@@ -10,7 +10,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
  * 3. Initialize: Load from backend API on first run
  */
 
-const useStore = create(
+export const useStore = create(
   persist(
     (set, get) => ({
       // Data state
@@ -27,12 +27,12 @@ const useStore = create(
       _hydratedFromBackend: false,
       _lastUpdate: null,
 
-      hydrateFromBackend: async (authToken) => {
+      hydrateFromBackend: async (token) => {
         const state = get();
 
         if (state._hydratedFromBackend) return;
 
-        const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+        const apiBaseUrl = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '');
 
         const hasAnyData =
           (state.team?.length || 0) > 0 ||

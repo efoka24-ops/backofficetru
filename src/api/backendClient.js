@@ -3,8 +3,7 @@
  * Centralized API calls with environment-aware URLs
  */
 
-// Hardcode the backend URL for both dev and production
-const baseURL = import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+const baseURL = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
 // Remove trailing slash if present
 const BACKEND_URL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
 

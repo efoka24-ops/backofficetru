@@ -1,7 +1,6 @@
 import axios from 'axios'
 
-// Use environment variable for backend URL, fallback to Render URL for production
-const API_URL = `${import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com'}/api`
+const API_URL = `${import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm'}/api`
 
 console.log('🔗 Backoffice API_URL:', API_URL)
 

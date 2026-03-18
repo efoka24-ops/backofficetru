@@ -94,7 +94,7 @@ class AutoFixer {
     try {
       // Appeler une API pour augmenter la limite
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com'}/api/config/increase-image-limit`,
+        `${import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm'}/api/config/increase-image-limit`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -126,7 +126,7 @@ class AutoFixer {
    */
   async checkBackendStatus() {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
       const response = await fetch(`${backendUrl}/api/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000) // 5 secondes timeout
@@ -161,7 +161,7 @@ class AutoFixer {
    * Vérifier l'URL du backend
    */
   async verifyBackendUrl() {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
     return {
       success: true,
       message: `✅ URL du backend: ${backendUrl}. Cette URL est correcte.`
@@ -173,7 +173,7 @@ class AutoFixer {
    */
   async wakeupBackend() {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
 
       // Faire plusieurs requêtes pour réveiller le service
       for (let i = 0; i < 3; i++) {

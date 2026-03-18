@@ -8,7 +8,7 @@ import { logger } from './logger';
 
 class RealtimeSyncService {
   constructor() {
-    this.backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+    this.backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
     this.frontendUrl = import.meta.env.VITE_FRONTEND_URL || 'https://trugroup.vercel.app';
     this.syncQueue = [];
     this.isSyncing = false;
