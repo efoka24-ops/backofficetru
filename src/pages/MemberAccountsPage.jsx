@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
 
 export default function MemberAccountsPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);

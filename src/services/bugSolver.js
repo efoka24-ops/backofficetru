@@ -70,7 +70,7 @@ const BUG_PATTERNS = [
         title: '🌐 Vérifier l\'URL du backend',
         description: 'Vérifier que la configuration pointe vers le bon backend',
         steps: [
-          'En production: https://tru-backend-o1zc.onrender.com',
+          'En production: https://back.trugroup.cm',
           'En local: http://localhost:5000',
           'Vérifier dans .env ou config/apiConfig.js'
         ],
@@ -80,7 +80,7 @@ const BUG_PATTERNS = [
         title: '🚀 Réveiller le backend Render',
         description: 'Les services gratuits Render s\'endorment après inactivité',
         steps: [
-          'Visiter: https://tru-backend-o1zc.onrender.com/api/health',
+          'Visiter: https://back.trugroup.cm/api/health',
           'Attendre 30-60 secondes pour le démarrage',
           'Essayer à nouveau'
         ],

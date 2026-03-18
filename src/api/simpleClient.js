@@ -3,7 +3,7 @@
  * Communication directe avec le backend
  */
 
-const baseURL = import.meta.env.VITE_BACKEND_URL || 'https://tru-backend-o1zc.onrender.com';
+const baseURL = import.meta.env.VITE_BACKEND_URL || 'https://back.trugroup.cm';
 // Remove trailing slash if present, then ensure /api is present
 const cleanURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
 const BACKEND_URL = `${cleanURL}/api`;
