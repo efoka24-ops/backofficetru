@@ -17,7 +17,11 @@ const getAuthHeaders = () => {
 export const backendClient = {
   // Testimonials
   async getTestimonials() {
-    const response = await fetch(`${BACKEND_URL}/api/testimonials`);
+    const response = await fetch(`${BACKEND_URL}/api/testimonials`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch testimonials');
     return response.json();
   },
@@ -25,7 +29,7 @@ export const backendClient = {
   async updateTestimonial(id, data) {
     const response = await fetch(`${BACKEND_URL}/api/testimonials/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to update testimonial');
@@ -35,7 +39,7 @@ export const backendClient = {
   async createTestimonial(data) {
     const response = await fetch(`${BACKEND_URL}/api/testimonials`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to create testimonial');
@@ -44,7 +48,10 @@ export const backendClient = {
 
   async deleteTestimonial(id) {
     const response = await fetch(`${BACKEND_URL}/api/testimonials/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeaders(),
+      },
     });
     if (!response.ok) throw new Error('Failed to delete testimonial');
     return response.json();
@@ -52,7 +59,11 @@ export const backendClient = {
 
   // News
   async getNews() {
-    const response = await fetch(`${BACKEND_URL}/api/news`);
+    const response = await fetch(`${BACKEND_URL}/api/news`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch news');
     return response.json();
   },
@@ -60,6 +71,9 @@ export const backendClient = {
   async createNews(data) {
     const response = await fetch(`${BACKEND_URL}/api/news`, {
       method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+      },
       body: data
     });
     if (!response.ok) throw new Error('Failed to create news');
@@ -69,6 +83,9 @@ export const backendClient = {
   async updateNews(id, data) {
     const response = await fetch(`${BACKEND_URL}/api/news/${id}`, {
       method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+      },
       body: data
     });
     if (!response.ok) throw new Error('Failed to update news');
@@ -77,7 +94,10 @@ export const backendClient = {
 
   async deleteNews(id) {
     const response = await fetch(`${BACKEND_URL}/api/news/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeaders(),
+      },
     });
     if (!response.ok) throw new Error('Failed to delete news');
     return response.json();
@@ -85,7 +105,11 @@ export const backendClient = {
 
   // Jobs
   async getJobs() {
-    const response = await fetch(`${BACKEND_URL}/api/jobs`);
+    const response = await fetch(`${BACKEND_URL}/api/jobs`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch jobs');
     return response.json();
   },
@@ -93,7 +117,7 @@ export const backendClient = {
   async createJob(data) {
     const response = await fetch(`${BACKEND_URL}/api/jobs`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to create job');
@@ -103,7 +127,7 @@ export const backendClient = {
   async updateJob(id, data) {
     const response = await fetch(`${BACKEND_URL}/api/jobs/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to update job');
@@ -112,7 +136,10 @@ export const backendClient = {
 
   async deleteJob(id) {
     const response = await fetch(`${BACKEND_URL}/api/jobs/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeaders(),
+      },
     });
     if (!response.ok) throw new Error('Failed to delete job');
     return response.json();
@@ -158,7 +185,10 @@ export const backendClient = {
 
   async deleteContact(id) {
     const response = await fetch(`${BACKEND_URL}/api/contacts/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeaders(),
+      },
     });
     if (!response.ok) throw new Error('Failed to delete contact');
     return response.json();
@@ -166,14 +196,22 @@ export const backendClient = {
 
   // Applications
   async getApplications() {
-    const response = await fetch(`${BACKEND_URL}/api/applications`);
+    const response = await fetch(`${BACKEND_URL}/api/applications`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch applications');
     return response.json();
   },
 
   // Settings
   async getSettings() {
-    const response = await fetch(`${BACKEND_URL}/api/settings`);
+    const response = await fetch(`${BACKEND_URL}/api/settings`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch settings');
     return response.json();
   },
@@ -181,7 +219,7 @@ export const backendClient = {
   async updateSettings(data) {
     const response = await fetch(`${BACKEND_URL}/api/settings`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to update settings');
@@ -197,7 +235,11 @@ export const backendClient = {
 
   // Projects CRUD
   async getProjects() {
-    const response = await fetch(`${BACKEND_URL}/api/projects`);
+    const response = await fetch(`${BACKEND_URL}/api/projects`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch projects');
     return response.json();
   },
@@ -205,7 +247,7 @@ export const backendClient = {
   async createProject(data) {
     const response = await fetch(`${BACKEND_URL}/api/projects`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to create project');
@@ -215,7 +257,7 @@ export const backendClient = {
   async updateProject(id, data) {
     const response = await fetch(`${BACKEND_URL}/api/projects/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to update project');
@@ -225,7 +267,7 @@ export const backendClient = {
   async deleteProject(id) {
     const response = await fetch(`${BACKEND_URL}/api/projects/${id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }
     });
     if (!response.ok) throw new Error('Failed to delete project');
     return response.json();
