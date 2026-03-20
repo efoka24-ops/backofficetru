@@ -9,6 +9,11 @@ const BACKEND_URL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
 
 console.log('🔗 Backend Client URL:', BACKEND_URL);
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const backendClient = {
   // Testimonials
   async getTestimonials() {
@@ -114,15 +119,27 @@ export const backendClient = {
   },
 
   async getContacts() {
-    const response = await fetch(`${BACKEND_URL}/api/contacts`);
+    const response = await fetch(`${BACKEND_URL}/api/contacts`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch contacts');
-    return response.json();
+    const data = await response.json();
+    const contacts = Array.isArray(data) ? data : [];
+    return contacts.map((c) => ({
+      ...c,
+      fullName: c.fullName ?? c.name,
+      createdAt: c.createdAt ?? c.created_at,
+      updatedAt: c.updatedAt ?? c.updated_at,
+      status: c.status ?? (c.read ? 'replied' : 'pending'),
+    }));
   },
 
   async updateContact(id, data) {
     const response = await fetch(`${BACKEND_URL}/api/contacts/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to update contact');
@@ -132,7 +149,7 @@ export const backendClient = {
   async replyToContact(id, data) {
     const response = await fetch(`${BACKEND_URL}/api/contacts/reply`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({ id, ...data })
     });
     if (!response.ok) throw new Error('Failed to send reply');
