@@ -15,29 +15,35 @@ export default function SolutionsPage() {
   const [editingSolution, setEditingSolution] = useState(null);
   const [search, setSearch] = useState('');
   const [notification, setNotification] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!editingSolution?.name || !editingSolution?.description) {
       showNotification('Nom et Description sont obligatoires', 'error');
       return;
     }
 
-    if (editingSolution.id) {
-      updateSolution(editingSolution.id, editingSolution);
-      showNotification('✅ Solution modifiée avec succès!');
-    } else {
-      addSolution(editingSolution);
-      showNotification('✅ Solution créée avec succès!');
+    setIsSubmitting(true);
+    try {
+      if (editingSolution.id) {
+        await updateSolution(editingSolution.id, editingSolution);
+        showNotification('✅ Solution modifiée avec succès!');
+      } else {
+        await addSolution(editingSolution);
+        showNotification('✅ Solution créée avec succès!');
+      }
+
+      setIsOpen(false);
+      setEditingSolution(null);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsOpen(false);
-    setEditingSolution(null);
   };
 
   const handleDelete = (solutionId) => {
@@ -439,10 +445,10 @@ export default function SolutionsPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={mutation.isPending}
+                      disabled={isSubmitting}
                       className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded font-semibold transition-colors"
                     >
-                      {mutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                      {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
                   </div>
                 </form>

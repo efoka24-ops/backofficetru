@@ -72,9 +72,10 @@ export const backendClient = {
     const response = await fetch(`${BACKEND_URL}/api/news`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         ...getAuthHeaders(),
       },
-      body: data
+      body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to create news');
     return response.json();
@@ -84,9 +85,10 @@ export const backendClient = {
     const response = await fetch(`${BACKEND_URL}/api/news/${id}`, {
       method: 'PUT',
       headers: {
+        'Content-Type': 'application/json',
         ...getAuthHeaders(),
       },
-      body: data
+      body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to update news');
     return response.json();

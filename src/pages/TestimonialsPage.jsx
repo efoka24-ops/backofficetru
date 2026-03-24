@@ -17,29 +17,35 @@ export default function TestimonialsPage() {
   const [search, setSearch] = useState('');
   const [notification, setNotification] = useState(null);
   const [isLoading] = useState(false); // Not needed for Zustand, but kept for UI consistency
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!editingTestimonial?.name || !editingTestimonial?.testimonial) {
       showNotification('Nom et Témoignage sont obligatoires', 'error');
       return;
     }
-    
-    if (editingTestimonial.id) {
-      updateTestimonial(editingTestimonial.id, editingTestimonial);
-      showNotification('✅ Témoignage modifié avec succès!');
-    } else {
-      addTestimonial(editingTestimonial);
-      showNotification('✅ Témoignage créé avec succès!');
+
+    setIsSubmitting(true);
+    try {
+      if (editingTestimonial.id) {
+        await updateTestimonial(editingTestimonial.id, editingTestimonial);
+        showNotification('✅ Témoignage modifié avec succès!');
+      } else {
+        await addTestimonial(editingTestimonial);
+        showNotification('✅ Témoignage créé avec succès!');
+      }
+
+      setIsOpen(false);
+      setEditingTestimonial(null);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsOpen(false);
-    setEditingTestimonial(null);
   };
 
   const handleDelete = (testimonialId) => {
@@ -357,10 +363,10 @@ export default function TestimonialsPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={mutation.isPending}
+                      disabled={isSubmitting}
                       className="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-400 text-white rounded font-semibold transition-colors"
                     >
-                      {mutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                      {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
                   </div>
                 </form>
