@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, X, Search } from 'lucide-react';
 import { backendClient } from '@/api/backendClient';
+import { uploadImage } from '@/api/uploadHelper';
 
 export default function NewsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,13 +29,13 @@ export default function NewsPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const formDataObj = new FormData();
-      formDataObj.append('title', data.title);
-      formDataObj.append('description', data.description);
-      formDataObj.append('category', data.category);
-      if (data.image) formDataObj.append('image', data.image);
-
-      return await backendClient.createNews(formDataObj);
+      const imageUrl = data.image ? await uploadImage(data.image) : null;
+      return await backendClient.createNews({
+        title: data.title,
+        content: data.description,
+        excerpt: data.category || null,
+        image_url: imageUrl,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
@@ -49,13 +50,16 @@ export default function NewsPage() {
 
   const updateMutation = useMutation({
     mutationFn: async (data) => {
-      const formDataObj = new FormData();
-      formDataObj.append('title', data.title);
-      formDataObj.append('description', data.description);
-      formDataObj.append('category', data.category);
-      if (data.image) formDataObj.append('image', data.image);
-
-      return backendClient.updateNews(data.id, formDataObj);
+      const imageUrl = data.image ? await uploadImage(data.image) : null;
+      const payload = {
+        title: data.title,
+        content: data.description,
+        excerpt: data.category || null,
+      };
+      if (imageUrl) {
+        payload.image_url = imageUrl;
+      }
+      return backendClient.updateNews(data.id, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
