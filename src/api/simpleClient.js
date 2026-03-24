@@ -185,7 +185,11 @@ export const apiClient = {
   // CONTACTS/TÉMOIGNAGES
   async getContacts() {
     try {
-      const response = await fetch(`${BACKEND_URL}/contacts`);
+      const response = await fetch(`${BACKEND_URL}/contacts`, {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
       if (!response.ok) throw new Error('Erreur récupération contacts');
       return await response.json();
     } catch (error) {

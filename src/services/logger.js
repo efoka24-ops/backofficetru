@@ -30,6 +30,17 @@ class Logger {
    * Log général - niveau et message
    */
   log(level, message, data = null) {
+    if (!Object.values(LOG_LEVELS).includes(level)) {
+      data = message;
+      message = level;
+      level = LOG_LEVELS.INFO;
+    }
+
+    if (message != null && typeof message !== 'string') {
+      data = message;
+      message = '';
+    }
+
     const timestamp = new Date().toISOString();
     const logEntry = {
       timestamp,
