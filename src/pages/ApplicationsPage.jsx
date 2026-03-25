@@ -12,10 +12,19 @@ export default function ApplicationsPage() {
   const [notification, setNotification] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: applications = [], isLoading } = useQuery({
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const { data: applications = [], isLoading, error } = useQuery({
     queryKey: ['applications'],
     queryFn: async () => backendClient.getApplications(),
-    staleTime: 30000,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 
   const updateMutation = useMutation({
@@ -48,10 +57,9 @@ export default function ApplicationsPage() {
     }
   });
 
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+  if (error && !notification) {
+    showNotification('❌ Erreur lors du chargement des candidatures', 'error');
+  }
 
   const handleStatusChange = (appId, newStatus) => {
     const app = applications.find(a => a.id === appId);
@@ -62,10 +70,11 @@ export default function ApplicationsPage() {
   };
 
   const filteredApps = applications.filter(app => {
-    const matchesSearch = 
-      app.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.jobTitle.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = String(searchTerm || '').toLowerCase();
+    const matchesSearch =
+      String(app?.fullName || '').toLowerCase().includes(q) ||
+      String(app?.email || '').toLowerCase().includes(q) ||
+      String(app?.jobTitle || '').toLowerCase().includes(q);
     
     const matchesFilter = statusFilter === 'Tous' || app.status === statusFilter;
     
@@ -189,7 +198,7 @@ export default function ApplicationsPage() {
                       <span>📧 {app.email}</span>
                       <span>📱 {app.phone}</span>
                       <span className="text-slate-400">
-                        📅 {new Date(app.appliedAt).toLocaleDateString('fr-FR')}
+                        📅 {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString('fr-FR') : '—'}
                       </span>
                     </div>
                   </div>
@@ -294,7 +303,7 @@ export default function ApplicationsPage() {
                   {/* Metadata */}
                   <div className="text-xs text-slate-500 space-y-1">
                     <p>ID: {viewingApp.id}</p>
-                    <p>Candidature: {new Date(viewingApp.appliedAt).toLocaleString('fr-FR')}</p>
+                    <p>Candidature: {viewingApp.appliedAt ? new Date(viewingApp.appliedAt).toLocaleString('fr-FR') : '—'}</p>
                   </div>
 
                   <button
